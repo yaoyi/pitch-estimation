@@ -1,6 +1,7 @@
+%this function is to test pitch estimation with .wav file
 [signal,fs]=readwav('data/lin.wav');
 fs
-[x1,x2]=voiDetect(signal);
+[x1,x2]=voiDetect(signal); %detect the start point speech as well as the  end point 
 if(fs==8000)
 	shift=0.003; %0.003*8000=24ms
 	winSize=0.02; %0.02*8000=160ms
