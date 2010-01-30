@@ -1,0 +1,11 @@
+1. type "run sinTest" to check the pitch estimation with sinusoid as input
+   type "run wavTest" to check the pitch estimation with .wav file as input
+   which is in the data/*.wav
+2.the voice toolbox provide a pitch tracker function, so we could use it as   a comparison
+a. copy refTest.m into directory voicebox, as well as the .wav file
+b. type "run refTest.m" under Matlab enviroment.
+c. the output to the console is pe which represent the pitch estimation.
+
+3.pitchfft.m: calculate the autocorrelation by fft method
+  pitchNor.m: calculate the autocorrelation by normal method, shift,producti  on and sum.
+  voiDetect:  decide the start point and end point of speech by calculating   the short-time-energy and zero-crossing-rate.
