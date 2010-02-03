@@ -17,4 +17,4 @@ if(fs==44100)
 	winSize=0.005; %0.005*44100=220ms
 end
 %pitchNor(signal,fs,shift,winSize);           %normal method
-pitchfft(signal(x1:x2),fs,shift,winSize,'normal'); %fft method, normal means using normal filtering method,also you could try 'median'
+pitchfft(signal(x1:x2),fs,shift,winSize,'median'); %fft method, normal means using normal filtering method,also you could try 'median'
