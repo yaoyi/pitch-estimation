@@ -3,5 +3,5 @@ signal=sin(20*pi*t)+sin(80*pi*t)+sin(120*pi*t);
 fs=1000;
 shift=0.01; %0.01*fs=10ms
 winSize=0.2; %0.2*fs=200ms
-%pitchTest(signal,fs,shift,winSize);
-pitchTest1(signal,fs,shift,winSize);
+%pitchNor(signal,fs,shift,winSize);
+pitchfft(signal,fs,shift,winSize);

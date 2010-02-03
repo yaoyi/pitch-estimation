@@ -1,31 +1,36 @@
-function [r] = pitchfft(signal, fs, shift,winSize)
- %% Initialization
- % if ~exist('maxlag', 'var') || isempty(maxlag)
-%	       maxlag = fs/50; % F0 is greater than 50Hz => 20ms maxlag
-% end
-%	if ~exist('show', 'var') || isempty(show)
-%		show = 0;
-%	 end
+function pe = pitchfft(signal, fs, shift,winSize,filMethod)
+%input para: 
+%signal: raw data.
+%fs: sampling rate
+%shift: indicate how many samples the window should shift every time
+%winSize: indicate how many samples will be processed every time
+%filMethod: indicate the filter method, now optios: normal,median
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%output para:
+%pe: pitch estimation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
- %shift N个采样点,需为整数
+%initialize the shift interval
 shift=round(fs*shift);  
 
 %n1=fix(fs*0.1)+1 
-n1=fix(fs*0.01)+1;     
-%n1=1;           %从第一帧开始
-n2=fix(fs*winSize)+n1; %窗口中的最后一帧
-shift_count=fix((length(signal)-n1)/shift);%总共移动的次数
-value =zeros(1,shift_count);
-temval =zeros(1,shift_count);
+n1=fix(fs*0.01)+1;   %initialize the start point   
+%n1=1;          
+n2=fix(fs*winSize)+n1; %initialize the  window size
+shift_count=fix((length(signal)-n1)/shift);%the total shift count
+value =zeros(1,shift_count); %initialize the pitch of each window
+%temval =zeros(1,shift_count); %this variable is for plotting
+
+%start processing
 for ii=1:shift_count 
     if n2<length(signal)    
-      data=signal(n1:n2);
-      N=n2-n1+1;
+      data=signal(n1:n2); %take a window of the original data
+      N=n2-n1+1; 
 	 %% Auto-correlation
-     r = xcorr(data, N,'coeff'); %coeff只是对输出的幅度进行标准化
-    temp = r(N+2:2*N+1);
-     value(ii)=find_maxn(temp);
-     temval(ii)=1/(value(ii)/fs);
+     r = xcorr(data, N,'coeff'); %this is the function given by matlab,so you could type "help xcorr to know more"
+    temp = r(N+2:2*N+1);   %r is symmetric,we only need half of it. 
+     value(ii)=find_maxn(temp); %find the pitch, which is the first peak of the window. 
+ %    temval(ii)=1/(value(ii)/fs);%prepare for plotting later.
      n1=n1+shift;            
      n2=n2+shift;
    end
@@ -45,35 +50,45 @@ for ii=1:shift_count
 	d=(-N:N)/fs;
 	subplot(4,1,2);
 	plot(d,r);
-	legend('Auto-correlation');
+	%legend('Auto-correlation');
 	xlabel('Lag (s)');
 	ylabel('Correlation coef');
 	subplot(4,1,3);	
 	stem(value);
-  	value=value(value~=0);
-  	aver=mean(value);
-  
-  %  index=find(abs((value-aver))>aver/5);
-  %  value(index)=0;                    
-  %  value=value(value>0);
-  
+	xlabel('shift count');
+	ylabel('pitch period');
+
+%start filtering
+if filMethod=='median' %median filter
+  value=medfilt2(value,[1 3])
+else    %normal filter
+% filtering to make the pitches more smooth.
+  value=value(value~=0);
+  aver=mean(value);
   value=value(logical(abs(value-aver)<=aver/5));
   len= length(value);
-  for jj=1:3:len/3                   
-      average=(value(jj)+value(jj+1)+value(jj+2))/3;
+  for jj=1:3:len/3   %using size 3 windows to filtering.                
+      average=(value(jj)+value(jj+1)+value(jj+2))/3;%calculate the mean value
       for kk=1:3
-          if abs((value(jj-1+kk))-average)>average/4
+          if abs((value(jj-1+kk))-average)>average/4%get rid of the large magnitude point.
               value(jj-1+kk)=0;     
-  %              len=len-1;
           end
       end
   end
+end
+
+%  subplot(4,1,4);
+%  plot(temval);
+%  xlabel('shift count');
+%  ylabel('pitch (Hz)');
   value=value(value~=0);
-   len=length(value);
+  %plot the pitch after smoothing
   subplot(4,1,4);
-  plot(temval);
+  plot(value);
   xlabel('shift count');
-  ylabel('pitch (Hz)');
+  ylabel('pitch period(ms)');
+  len=length(value);
+
   %axis([0 length(value) 0 max(value)])
   pe=1/((sum(value)/len)/fs)
 
