@@ -1,7 +1,7 @@
 %this function is to test pitch estimation with .wav file
 %.wav file is in data/
 
-[signal,fs]=readwav('data/lin.wav');%read the .wav file to matlab workspace
+[signal,fs]=readwav('data/piano.wav');%read the .wav file to matlab workspace
 fs%show the sample frequency
 [x1,x2]=voiDetect(signal); %detect the start point speech as well as the end point 
 if(fs==8000)
